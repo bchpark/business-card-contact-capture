@@ -256,6 +256,7 @@ svg {
   position: relative;
   grid-column: 1 / -1;
   width: 100%;
+  min-height: 180px;
   border-radius: 8px;
   background: #111;
   overflow: hidden;
@@ -301,6 +302,12 @@ svg {
   display: block;
 }
 
+.ocr-box.is-selected {
+  outline: 4px solid color-mix(in srgb, var(--box-color) 45%, white);
+  outline-offset: 4px;
+  z-index: 5;
+}
+
 .ocr-box.is-scanning {
   animation: scanPulse 900ms ease-in-out infinite alternate;
 }
@@ -332,34 +339,35 @@ svg {
 
 .resize-handle {
   position: absolute;
-  width: 14px;
-  height: 14px;
+  width: 28px;
+  height: 28px;
   border: 2px solid white;
-  border-radius: 50%;
+  border-radius: 8px;
   background: var(--box-color);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 .resize-handle.nw {
-  left: -8px;
-  top: -8px;
+  left: -16px;
+  top: -16px;
   cursor: nwse-resize;
 }
 
 .resize-handle.ne {
-  right: -8px;
-  top: -8px;
+  right: -16px;
+  top: -16px;
   cursor: nesw-resize;
 }
 
 .resize-handle.sw {
-  left: -8px;
-  bottom: -8px;
+  left: -16px;
+  bottom: -16px;
   cursor: nesw-resize;
 }
 
 .resize-handle.se {
-  right: -8px;
-  bottom: -8px;
+  right: -16px;
+  bottom: -16px;
   cursor: nwse-resize;
 }
 
@@ -461,6 +469,52 @@ input:focus {
 .wide-button {
   width: 100%;
   margin-top: 10px;
+}
+
+.box-controls {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+  padding: 12px;
+}
+
+.box-controls[hidden] {
+  display: none;
+}
+
+.box-controls-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.box-controls-head strong {
+  color: var(--accent);
+}
+
+.nudge-pad,
+.size-pad {
+  display: grid;
+  gap: 8px;
+}
+
+.nudge-pad {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.size-pad {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-top: 8px;
+}
+
+.nudge-pad button,
+.size-pad button {
+  min-height: 46px;
+  background: #eef4ef;
+  color: var(--ink);
 }
 
 .contact-form {
@@ -603,7 +657,8 @@ input:focus {
   .ghost-link,
   .action-row button,
   .export-row button,
-  #saveBtn {
+  #saveBtn,
+  .box-controls-head button {
     width: 100%;
   }
 
@@ -616,5 +671,36 @@ input:focus {
 
   .ocr-options {
     grid-template-columns: 1fr;
+  }
+
+  .box-controls-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .resize-handle {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+  }
+
+  .resize-handle.nw {
+    left: -20px;
+    top: -20px;
+  }
+
+  .resize-handle.ne {
+    right: -20px;
+    top: -20px;
+  }
+
+  .resize-handle.sw {
+    left: -20px;
+    bottom: -20px;
+  }
+
+  .resize-handle.se {
+    right: -20px;
+    bottom: -20px;
   }
 }

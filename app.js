@@ -9,6 +9,7 @@ const state = {
     person: null,
     contact: null
   },
+  selectedBoxType: null,
   boxDrag: null,
   contacts: JSON.parse(localStorage.getItem("business-card-contacts") || "[]")
 };
@@ -50,6 +51,9 @@ window.addEventListener("DOMContentLoaded", () => {
   $("parseBtn").addEventListener("click", () => fillForm(parseContact($("rawText").value)));
   $("clearBtn").addEventListener("click", resetCurrent);
   $("rescanBoxesBtn").addEventListener("click", rescanBoxes);
+  $("rescanSelectedBoxBtn").addEventListener("click", () => {
+    if (state.selectedBoxType) rescanSingleBox(state.selectedBoxType);
+  });
   $("saveBtn").addEventListener("click", saveContact);
   $("googleAuthBtn").addEventListener("click", connectGoogle);
   $("directSaveBtn").addEventListener("click", saveDirectlyToGoogle);
@@ -58,6 +62,7 @@ window.addEventListener("DOMContentLoaded", () => {
   $("vcfBtn").addEventListener("click", exportVCard);
   $("deleteAllBtn").addEventListener("click", deleteAllContacts);
   setupBoxInteraction();
+  setupBoxControls();
   $("googleClientId").value = state.googleClientId;
   updateGoogleButtons();
   renderContacts();
@@ -391,13 +396,17 @@ function setOcrBox(type, box) {
   state.boxes[type] = normalizeBox(box);
   renderOcrBox(type);
   $("rescanBoxesBtn").disabled = false;
+  if (!state.selectedBoxType) selectOcrBox(type);
 }
 
 function hideOcrBoxes() {
   Object.keys(boxConfig).forEach((type) => {
     state.boxes[type] = null;
     $(boxConfig[type].elementId).classList.remove("is-visible");
+    $(boxConfig[type].elementId).classList.remove("is-selected");
   });
+  state.selectedBoxType = null;
+  updateBoxControls();
   $("rescanBoxesBtn").disabled = true;
 }
 
@@ -414,6 +423,7 @@ function renderOcrBox(type) {
   box.style.width = `${selected.width * 100}%`;
   box.style.height = `${selected.height * 100}%`;
   box.classList.add("is-visible");
+  box.classList.toggle("is-selected", state.selectedBoxType === type);
 }
 
 function normalizeBox(box) {
@@ -432,6 +442,7 @@ function setupBoxInteraction() {
     box.addEventListener("pointerdown", (event) => {
       if (!state.boxes[type]) return;
       event.preventDefault();
+      selectOcrBox(type);
       const frameRect = $("previewFrame").getBoundingClientRect();
       const handle = event.target.dataset.handle || "move";
       state.boxDrag = {
@@ -451,6 +462,64 @@ function setupBoxInteraction() {
     box.addEventListener("pointerup", endBoxDrag);
     box.addEventListener("pointercancel", endBoxDrag);
   });
+}
+
+function setupBoxControls() {
+  document.querySelectorAll("[data-adjust]").forEach((button) => {
+    button.addEventListener("click", () => adjustSelectedBox(button.dataset.adjust));
+  });
+}
+
+function selectOcrBox(type) {
+  state.selectedBoxType = type;
+  Object.keys(boxConfig).forEach(renderOcrBox);
+  updateBoxControls();
+}
+
+function updateBoxControls() {
+  const panel = $("boxControls");
+  if (!state.selectedBoxType || !state.boxes[state.selectedBoxType]) {
+    panel.hidden = true;
+    return;
+  }
+
+  panel.hidden = false;
+  $("selectedBoxLabel").textContent = `${boxConfig[state.selectedBoxType].label} 영역 조절`;
+}
+
+function adjustSelectedBox(action) {
+  const type = state.selectedBoxType;
+  if (!type || !state.boxes[type]) return;
+
+  const step = 0.018;
+  const sizeStep = 0.025;
+  const current = { ...state.boxes[type] };
+
+  if (action === "up") current.y -= step;
+  if (action === "down") current.y += step;
+  if (action === "left") current.x -= step;
+  if (action === "right") current.x += step;
+  if (action === "wider") {
+    current.x -= sizeStep / 2;
+    current.width += sizeStep;
+  }
+  if (action === "narrower") {
+    current.x += sizeStep / 2;
+    current.width -= sizeStep;
+  }
+  if (action === "taller") {
+    current.y -= sizeStep / 2;
+    current.height += sizeStep;
+  }
+  if (action === "shorter") {
+    current.y += sizeStep / 2;
+    current.height -= sizeStep;
+  }
+
+  state.boxes[type] = normalizeBox(current);
+  renderOcrBox(type);
+  clearTimeout(state.adjustTimer);
+  state.adjustTimer = setTimeout(() => rescanSingleBox(type, { source: "controls" }), 450);
 }
 
 function updateDraggedBox(event) {

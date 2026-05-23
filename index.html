@@ -117,6 +117,28 @@
           <i data-lucide="scan-line"></i>
           수동으로 전체 다시 인식
         </button>
+
+        <div id="boxControls" class="box-controls" aria-label="선택한 사각형 조절" hidden>
+          <div class="box-controls-head">
+            <strong id="selectedBoxLabel">선택한 영역</strong>
+            <button id="rescanSelectedBoxBtn" class="secondary" type="button">
+              <i data-lucide="refresh-cw"></i>
+              선택 영역 인식
+            </button>
+          </div>
+          <div class="nudge-pad">
+            <button type="button" data-adjust="up" aria-label="위로 이동"><i data-lucide="arrow-up"></i></button>
+            <button type="button" data-adjust="left" aria-label="왼쪽 이동"><i data-lucide="arrow-left"></i></button>
+            <button type="button" data-adjust="down" aria-label="아래로 이동"><i data-lucide="arrow-down"></i></button>
+            <button type="button" data-adjust="right" aria-label="오른쪽 이동"><i data-lucide="arrow-right"></i></button>
+          </div>
+          <div class="size-pad">
+            <button type="button" data-adjust="wider"><i data-lucide="move-horizontal"></i> 넓게</button>
+            <button type="button" data-adjust="narrower"><i data-lucide="minimize-2"></i> 좁게</button>
+            <button type="button" data-adjust="taller"><i data-lucide="move-vertical"></i> 높게</button>
+            <button type="button" data-adjust="shorter"><i data-lucide="minus"></i> 낮게</button>
+          </div>
+        </div>
       </section>
 
       <section class="contact-panel">
