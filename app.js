@@ -85,9 +85,8 @@ function handleImage(event) {
   preview.onload = () => {
     const isLandscape = preview.naturalWidth > preview.naturalHeight * 1.08;
     if (isLandscape) {
-      setPreviewMode("wide");
-      setEditMode(true);
-      setStatus("가로 사진을 감지해 큰 편집 화면으로 열었습니다. 박스를 조절한 뒤 선택 영역 인식을 눌러 주세요.", 100);
+      setPreviewMode("fit");
+      setStatus("가로 사진을 전체 보기로 표시했습니다. 정밀 조정이 필요하면 편집 화면을 눌러 주세요.", 100);
     }
   };
   $("previewFrame").classList.add("is-visible");
