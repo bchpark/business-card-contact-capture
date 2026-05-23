@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>명함 연락처 변환기</title>
+    <link rel="stylesheet" href="styles.css">
+    <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script defer src="app.js"></script>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="capture-panel">
+        <div class="brand-row">
+          <div>
+            <p class="eyebrow">Business Card OCR</p>
+            <h1>명함을 연락처로 변환</h1>
+          </div>
+          <a class="ghost-link" href="https://contacts.google.com/" target="_blank" rel="noreferrer">
+            <i data-lucide="external-link"></i>
+            Google 연락처
+          </a>
+        </div>
+
+        <div class="scan-surface">
+          <div class="card-visual" aria-hidden="true">
+            <div class="card-line wide"></div>
+            <div class="card-line"></div>
+            <div class="card-chip"></div>
+            <div class="card-grid">
+              <span></span>
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
+          </div>
+
+          <label class="drop-zone" for="imageInput">
+            <input id="imageInput" type="file" accept="image/*" capture="environment">
+            <span class="icon-box"><i data-lucide="camera"></i></span>
+            <strong>명함 사진 선택 또는 촬영</strong>
+            <span>JPG, PNG, WebP 지원</span>
+          </label>
+
+          <div id="previewFrame" class="preview-frame">
+            <img id="preview" class="preview" alt="선택한 명함 미리보기">
+            <div id="companyBox" class="ocr-box company-box" role="application" aria-label="회사 이름 영역 선택 상자" data-box="company">
+              <span class="ocr-box-label">회사</span>
+              <span class="resize-handle nw" data-handle="nw"></span>
+              <span class="resize-handle ne" data-handle="ne"></span>
+              <span class="resize-handle sw" data-handle="sw"></span>
+              <span class="resize-handle se" data-handle="se"></span>
+            </div>
+            <div id="personBox" class="ocr-box person-box" role="application" aria-label="사람 이름 영역 선택 상자" data-box="person">
+              <span class="ocr-box-label">사람</span>
+              <span class="resize-handle nw" data-handle="nw"></span>
+              <span class="resize-handle ne" data-handle="ne"></span>
+              <span class="resize-handle sw" data-handle="sw"></span>
+              <span class="resize-handle se" data-handle="se"></span>
+            </div>
+            <div id="contactBox" class="ocr-box contact-box" role="application" aria-label="연락처 영역 선택 상자" data-box="contact">
+              <span class="ocr-box-label">연락처</span>
+              <span class="resize-handle nw" data-handle="nw"></span>
+              <span class="resize-handle ne" data-handle="ne"></span>
+              <span class="resize-handle sw" data-handle="sw"></span>
+              <span class="resize-handle se" data-handle="se"></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button id="scanBtn" class="primary" disabled>
+            <i data-lucide="scan-text"></i>
+            글자 인식
+          </button>
+          <button id="clearBtn" class="secondary" type="button">
+            <i data-lucide="rotate-ccw"></i>
+            초기화
+          </button>
+        </div>
+
+        <div class="ocr-options" aria-label="OCR 품질 설정">
+          <label>
+            <span>인식 방식</span>
+            <select id="ocrMode">
+              <option value="contrast" selected>한글 강화</option>
+              <option value="binary">작은 글자 선명</option>
+              <option value="soft">원본에 가깝게</option>
+            </select>
+          </label>
+          <label>
+            <span>확대</span>
+            <select id="scaleMode">
+              <option value="2">2배</option>
+              <option value="3" selected>3배</option>
+              <option value="4">4배</option>
+            </select>
+          </label>
+        </div>
+
+        <div class="progress-wrap" aria-live="polite">
+          <div class="progress-track"><span id="progressBar"></span></div>
+          <p id="statusText">사진을 선택하면 OCR을 시작할 수 있습니다.</p>
+        </div>
+
+        <label class="raw-text">
+          <span>인식된 글자</span>
+          <textarea id="rawText" rows="9" placeholder="OCR 결과가 여기에 표시됩니다. 필요한 경우 직접 수정한 뒤 다시 추출하세요."></textarea>
+        </label>
+        <button id="parseBtn" class="secondary wide-button" type="button">
+          <i data-lucide="wand-sparkles"></i>
+          수정한 글자로 다시 추출
+        </button>
+        <button id="rescanBoxesBtn" class="secondary wide-button" type="button" disabled>
+          <i data-lucide="scan-line"></i>
+          수동으로 전체 다시 인식
+        </button>
+      </section>
+
+      <section class="contact-panel">
+        <div class="panel-header">
+          <div>
+            <p class="eyebrow">Contact Fields</p>
+            <h2>연락처 확인</h2>
+          </div>
+          <button id="saveBtn" class="primary" type="button">
+            <i data-lucide="plus"></i>
+            목록에 추가
+          </button>
+        </div>
+
+        <form id="contactForm" class="contact-form">
+          <label>이름<input id="name" autocomplete="name"></label>
+          <label>회사<input id="company" autocomplete="organization"></label>
+          <label>직함<input id="title" autocomplete="organization-title"></label>
+          <label>휴대폰<input id="mobile" autocomplete="tel"></label>
+          <label>전화<input id="phone" autocomplete="tel"></label>
+          <label>이메일<input id="email" autocomplete="email"></label>
+          <label>웹사이트<input id="website" autocomplete="url"></label>
+          <label class="full">주소<input id="address" autocomplete="street-address"></label>
+          <label class="full">메모<textarea id="notes" rows="3"></textarea></label>
+        </form>
+
+        <div class="export-row">
+          <button id="csvBtn" class="secondary" type="button">
+            <i data-lucide="file-spreadsheet"></i>
+            Google CSV
+          </button>
+          <button id="vcfBtn" class="secondary" type="button">
+            <i data-lucide="contact"></i>
+            vCard
+          </button>
+        </div>
+
+        <div class="saved-header">
+          <h2>저장된 명함</h2>
+          <button id="deleteAllBtn" class="text-button" type="button">전체 삭제</button>
+        </div>
+        <div id="contactsList" class="contacts-list"></div>
+      </section>
+    </main>
+  </body>
+</html>
