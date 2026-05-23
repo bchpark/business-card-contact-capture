@@ -260,10 +260,10 @@ svg {
   position: relative;
   grid-column: 1 / -1;
   width: 100%;
-  min-height: 420px;
+  min-height: 0;
   border-radius: 8px;
   background: #111;
-  overflow: auto;
+  overflow: hidden;
   overscroll-behavior: contain;
   touch-action: none;
 }
@@ -274,7 +274,17 @@ svg {
 
 .preview-stage {
   position: relative;
-  width: max(100%, 760px);
+  width: 100%;
+}
+
+.preview-frame.is-wide {
+  max-height: 72vh;
+  overflow: auto;
+  border: 2px solid var(--accent);
+}
+
+.preview-frame.is-wide .preview-stage {
+  width: max(150vw, 760px);
 }
 
 .preview {
@@ -292,6 +302,20 @@ svg {
 
 .preview.is-visible {
   display: block;
+}
+
+.preview-tools {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+}
+
+.preview-tools[hidden] {
+  display: none;
+}
+
+.preview-tools button {
+  flex: 1;
 }
 
 .ocr-box {
@@ -658,9 +682,8 @@ input:focus {
   }
 
   .preview-frame {
-    min-height: 68vh;
-    max-height: 72vh;
-    border: 2px solid var(--accent);
+    min-height: 0;
+    max-height: none;
   }
 
   .preview {
@@ -668,7 +691,16 @@ input:focus {
   }
 
   .preview-stage {
-    width: max(150vw, 760px);
+    width: 100%;
+  }
+
+  .preview-frame.is-wide {
+    min-height: 56vh;
+    max-height: 72vh;
+  }
+
+  .preview-frame.is-wide .preview-stage {
+    width: max(170vw, 760px);
   }
 }
 
@@ -685,6 +717,7 @@ input:focus {
   .ghost-link,
   .action-row button,
   .export-row button,
+  .preview-tools button,
   #saveBtn,
   .box-controls-head button {
     width: 100%;

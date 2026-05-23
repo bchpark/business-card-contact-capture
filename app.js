@@ -47,6 +47,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   $("imageInput").addEventListener("change", handleImage);
+  $("fitViewBtn").addEventListener("click", () => setPreviewMode("fit"));
+  $("wideViewBtn").addEventListener("click", () => setPreviewMode("wide"));
   $("scanBtn").addEventListener("click", scanImage);
   $("parseBtn").addEventListener("click", () => fillForm(parseContact($("rawText").value)));
   $("clearBtn").addEventListener("click", resetCurrent);
@@ -80,9 +82,29 @@ function handleImage(event) {
   preview.src = url;
   $("previewFrame").classList.add("is-visible");
   preview.classList.add("is-visible");
+  $("previewTools").hidden = false;
+  setPreviewMode("fit");
   hideOcrBoxes();
   $("scanBtn").disabled = false;
   setStatus("사진이 준비되었습니다. 한글 강화 전처리 후 인식할 수 있습니다.", 0);
+}
+
+function setPreviewMode(mode) {
+  const frame = $("previewFrame");
+  const fitButton = $("fitViewBtn");
+  const wideButton = $("wideViewBtn");
+  const isWide = mode === "wide";
+
+  frame.classList.toggle("is-wide", isWide);
+  fitButton.classList.toggle("primary", !isWide);
+  fitButton.classList.toggle("secondary", isWide);
+  wideButton.classList.toggle("primary", isWide);
+  wideButton.classList.toggle("secondary", !isWide);
+
+  if (!isWide) {
+    frame.scrollLeft = 0;
+    frame.scrollTop = 0;
+  }
 }
 
 async function scanImage() {
@@ -1070,6 +1092,8 @@ function resetCurrent() {
   $("preview").removeAttribute("src");
   $("preview").classList.remove("is-visible");
   $("previewFrame").classList.remove("is-visible");
+  $("previewFrame").classList.remove("is-wide");
+  $("previewTools").hidden = true;
   $("rawText").value = "";
   fillForm({});
   if (state.imageUrl) {
