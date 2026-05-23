@@ -27,6 +27,10 @@ body {
   font-family: "Segoe UI", "Noto Sans KR", system-ui, sans-serif;
 }
 
+body.is-adjusting-box {
+  overflow: hidden;
+}
+
 button,
 input,
 textarea {
@@ -256,25 +260,34 @@ svg {
   position: relative;
   grid-column: 1 / -1;
   width: 100%;
-  min-height: 180px;
+  min-height: 420px;
   border-radius: 8px;
   background: #111;
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
+  touch-action: none;
 }
 
 .preview-frame.is-visible {
   display: block;
 }
 
+.preview-stage {
+  position: relative;
+  width: max(100%, 760px);
+}
+
 .preview {
   display: none;
   width: 100%;
-  max-height: 360px;
+  max-width: none;
+  max-height: none;
   object-fit: contain;
   border-radius: 8px;
   background: transparent;
   user-select: none;
   -webkit-user-drag: none;
+  touch-action: none;
 }
 
 .preview.is-visible {
@@ -295,6 +308,7 @@ svg {
   background: color-mix(in srgb, var(--box-color) 12%, transparent);
   cursor: move;
   touch-action: none;
+  user-select: none;
   box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.08);
 }
 
@@ -641,6 +655,20 @@ input:focus {
   h1 {
     font-size: 2.35rem;
     line-height: 1.08;
+  }
+
+  .preview-frame {
+    min-height: 68vh;
+    max-height: 72vh;
+    border: 2px solid var(--accent);
+  }
+
+  .preview {
+    width: 100%;
+  }
+
+  .preview-stage {
+    width: max(150vw, 760px);
   }
 }
 

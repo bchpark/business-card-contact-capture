@@ -442,8 +442,9 @@ function setupBoxInteraction() {
     box.addEventListener("pointerdown", (event) => {
       if (!state.boxes[type]) return;
       event.preventDefault();
+      document.body.classList.add("is-adjusting-box");
       selectOcrBox(type);
-      const frameRect = $("previewFrame").getBoundingClientRect();
+      const frameRect = $("previewStage").getBoundingClientRect();
       const handle = event.target.dataset.handle || "move";
       state.boxDrag = {
         type,
@@ -518,8 +519,7 @@ function adjustSelectedBox(action) {
 
   state.boxes[type] = normalizeBox(current);
   renderOcrBox(type);
-  clearTimeout(state.adjustTimer);
-  state.adjustTimer = setTimeout(() => rescanSingleBox(type, { source: "controls" }), 450);
+  setStatus(`${boxConfig[type].label} 영역을 조절했습니다. 인식하려면 선택 영역 인식을 눌러 주세요.`, 100);
 }
 
 function updateDraggedBox(event) {
@@ -559,8 +559,9 @@ function updateDraggedBox(event) {
 function endBoxDrag() {
   const drag = state.boxDrag;
   state.boxDrag = null;
+  document.body.classList.remove("is-adjusting-box");
   if (drag?.moved) {
-    rescanSingleBox(drag.type, { source: "drag" });
+    setStatus(`${boxConfig[drag.type].label} 영역을 조절했습니다. 인식하려면 선택 영역 인식을 눌러 주세요.`, 100);
   }
 }
 
