@@ -79,6 +79,10 @@
               <i data-lucide="move-horizontal"></i>
               가로 확대
             </button>
+            <button id="editViewBtn" class="secondary" type="button">
+              <i data-lucide="maximize"></i>
+              편집 화면
+            </button>
           </div>
         </div>
 
@@ -133,6 +137,10 @@
         <div id="boxControls" class="box-controls" aria-label="선택한 사각형 조절" hidden>
           <div class="box-controls-head">
             <strong id="selectedBoxLabel">선택한 영역</strong>
+            <button id="closeEditViewBtn" class="secondary edit-only" type="button">
+              <i data-lucide="check"></i>
+              완료
+            </button>
             <button id="rescanSelectedBoxBtn" class="secondary" type="button">
               <i data-lucide="refresh-cw"></i>
               선택 영역 인식

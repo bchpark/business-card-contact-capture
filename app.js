@@ -49,6 +49,8 @@ window.addEventListener("DOMContentLoaded", () => {
   $("imageInput").addEventListener("change", handleImage);
   $("fitViewBtn").addEventListener("click", () => setPreviewMode("fit"));
   $("wideViewBtn").addEventListener("click", () => setPreviewMode("wide"));
+  $("editViewBtn").addEventListener("click", () => setEditMode(true));
+  $("closeEditViewBtn").addEventListener("click", () => setEditMode(false));
   $("scanBtn").addEventListener("click", scanImage);
   $("parseBtn").addEventListener("click", () => fillForm(parseContact($("rawText").value)));
   $("clearBtn").addEventListener("click", resetCurrent);
@@ -80,6 +82,14 @@ function handleImage(event) {
   state.imageUrl = url;
   const preview = $("preview");
   preview.src = url;
+  preview.onload = () => {
+    const isLandscape = preview.naturalWidth > preview.naturalHeight * 1.08;
+    if (isLandscape) {
+      setPreviewMode("wide");
+      setEditMode(true);
+      setStatus("가로 사진을 감지해 큰 편집 화면으로 열었습니다. 박스를 조절한 뒤 선택 영역 인식을 눌러 주세요.", 100);
+    }
+  };
   $("previewFrame").classList.add("is-visible");
   preview.classList.add("is-visible");
   $("previewTools").hidden = false;
@@ -104,6 +114,20 @@ function setPreviewMode(mode) {
   if (!isWide) {
     frame.scrollLeft = 0;
     frame.scrollTop = 0;
+  }
+}
+
+function setEditMode(enabled) {
+  if (!$("previewFrame").classList.contains("is-visible")) return;
+
+  document.body.classList.toggle("is-editing-photo", enabled);
+  if (enabled) {
+    setPreviewMode("wide");
+    setStatus("편집 화면입니다. 박스를 선택하고 아래 버튼으로 조절한 뒤 선택 영역 인식을 눌러 주세요.", 100);
+    if (state.selectedBoxType) updateBoxControls();
+  } else {
+    setPreviewMode("fit");
+    setStatus("전체 보기로 돌아왔습니다.", 100);
   }
 }
 
@@ -1093,6 +1117,7 @@ function resetCurrent() {
   $("preview").classList.remove("is-visible");
   $("previewFrame").classList.remove("is-visible");
   $("previewFrame").classList.remove("is-wide");
+  document.body.classList.remove("is-editing-photo");
   $("previewTools").hidden = true;
   $("rawText").value = "";
   fillForm({});

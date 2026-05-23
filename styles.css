@@ -31,6 +31,10 @@ body.is-adjusting-box {
   overflow: hidden;
 }
 
+body.is-editing-photo {
+  overflow: hidden;
+}
+
 button,
 input,
 textarea {
@@ -287,6 +291,67 @@ svg {
   width: max(150vw, 760px);
 }
 
+body.is-editing-photo .app-shell {
+  width: 100%;
+  padding: 0;
+  display: block;
+}
+
+body.is-editing-photo .capture-panel {
+  min-height: 100vh;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 10px;
+}
+
+body.is-editing-photo .brand-row,
+body.is-editing-photo .card-visual,
+body.is-editing-photo .drop-zone,
+body.is-editing-photo .action-row,
+body.is-editing-photo .ocr-options,
+body.is-editing-photo .progress-wrap,
+body.is-editing-photo .raw-text,
+body.is-editing-photo #parseBtn,
+body.is-editing-photo #rescanBoxesBtn,
+body.is-editing-photo .contact-panel {
+  display: none;
+}
+
+body.is-editing-photo .scan-surface {
+  margin: 0;
+  min-height: calc(100vh - 182px);
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: #111;
+  display: block;
+}
+
+body.is-editing-photo .preview-frame {
+  display: block;
+  height: calc(100vh - 182px);
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  overflow: auto;
+  touch-action: none;
+}
+
+body.is-editing-photo .preview-stage {
+  width: max(178vw, 820px);
+}
+
+body.is-editing-photo .preview-tools {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 156px;
+  z-index: 20;
+  padding: 8px;
+  background: rgba(245, 247, 243, 0.96);
+}
+
 .preview {
   display: none;
   width: 100%;
@@ -515,6 +580,25 @@ input:focus {
   border-radius: 8px;
   background: #fbfcfb;
   padding: 12px;
+}
+
+body.is-editing-photo .box-controls {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 30;
+  margin: 0;
+  border-radius: 8px 8px 0 0;
+  box-shadow: 0 -10px 28px rgba(23, 32, 27, 0.18);
+}
+
+.edit-only {
+  display: none;
+}
+
+body.is-editing-photo .edit-only {
+  display: inline-flex;
 }
 
 .box-controls[hidden] {
