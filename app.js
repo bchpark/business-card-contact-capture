@@ -722,11 +722,13 @@ function updateGoogleButtons() {
   $("directSaveBtn").disabled = !state.googleAccessToken;
 }
 
-function connectGoogle() {
+async function connectGoogle() {
   if (!state.googleClientId) {
     setStatus("먼저 Google OAuth Client ID를 입력하고 저장해 주세요.", 0);
     return;
   }
+
+  await loadGoogleIdentityScript();
 
   if (!window.google?.accounts?.oauth2) {
     setStatus("Google 로그인 라이브러리를 불러오지 못했습니다. 페이지를 새로고침해 주세요.", 0);
@@ -750,6 +752,28 @@ function connectGoogle() {
   });
 
   state.googleTokenClient.requestAccessToken({ prompt: "consent" });
+}
+
+function loadGoogleIdentityScript() {
+  if (window.google?.accounts?.oauth2) return Promise.resolve();
+
+  return new Promise((resolve) => {
+    const existing = [...document.scripts].find((script) => script.src === "https://accounts.google.com/gsi/client");
+    if (existing) {
+      existing.addEventListener("load", resolve, { once: true });
+      existing.addEventListener("error", resolve, { once: true });
+      setTimeout(resolve, 2500);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = "https://accounts.google.com/gsi/client";
+    script.async = true;
+    script.defer = true;
+    script.onload = resolve;
+    script.onerror = resolve;
+    document.head.appendChild(script);
+  });
 }
 
 async function saveDirectlyToGoogle() {
