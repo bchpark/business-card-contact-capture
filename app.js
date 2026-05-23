@@ -1,6 +1,9 @@
 const state = {
   imageFile: null,
   imageUrl: "",
+  googleAccessToken: "",
+  googleTokenClient: null,
+  googleClientId: localStorage.getItem("google-oauth-client-id") || "",
   boxes: {
     company: null,
     person: null,
@@ -48,10 +51,15 @@ window.addEventListener("DOMContentLoaded", () => {
   $("clearBtn").addEventListener("click", resetCurrent);
   $("rescanBoxesBtn").addEventListener("click", rescanBoxes);
   $("saveBtn").addEventListener("click", saveContact);
+  $("googleAuthBtn").addEventListener("click", connectGoogle);
+  $("directSaveBtn").addEventListener("click", saveDirectlyToGoogle);
+  $("saveClientIdBtn").addEventListener("click", saveGoogleClientId);
   $("csvBtn").addEventListener("click", exportGoogleCsv);
   $("vcfBtn").addEventListener("click", exportVCard);
   $("deleteAllBtn").addEventListener("click", deleteAllContacts);
   setupBoxInteraction();
+  $("googleClientId").value = state.googleClientId;
+  updateGoogleButtons();
   renderContacts();
 });
 
@@ -690,6 +698,131 @@ function saveContact() {
   persistContacts();
   renderContacts();
   setStatus("연락처 목록에 추가했습니다.", 100);
+}
+
+function saveGoogleClientId() {
+  const clientId = $("googleClientId").value.trim();
+  state.googleClientId = clientId;
+  state.googleAccessToken = "";
+  state.googleTokenClient = null;
+
+  if (clientId) {
+    localStorage.setItem("google-oauth-client-id", clientId);
+    setStatus("Google Client ID를 저장했습니다. 이제 Google 권한 연결을 눌러 주세요.", 100);
+  } else {
+    localStorage.removeItem("google-oauth-client-id");
+    setStatus("Google Client ID를 비웠습니다.", 0);
+  }
+
+  updateGoogleButtons();
+}
+
+function updateGoogleButtons() {
+  $("googleAuthBtn").disabled = !state.googleClientId;
+  $("directSaveBtn").disabled = !state.googleAccessToken;
+}
+
+function connectGoogle() {
+  if (!state.googleClientId) {
+    setStatus("먼저 Google OAuth Client ID를 입력하고 저장해 주세요.", 0);
+    return;
+  }
+
+  if (!window.google?.accounts?.oauth2) {
+    setStatus("Google 로그인 라이브러리를 불러오지 못했습니다. 페이지를 새로고침해 주세요.", 0);
+    return;
+  }
+
+  state.googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+    client_id: state.googleClientId,
+    scope: "https://www.googleapis.com/auth/contacts",
+    callback: (response) => {
+      if (response.error) {
+        console.error(response);
+        setStatus(`Google 권한 연결 실패: ${response.error}`, 0);
+        return;
+      }
+
+      state.googleAccessToken = response.access_token;
+      updateGoogleButtons();
+      setStatus("Google 연락처 저장 권한이 연결되었습니다.", 100);
+    }
+  });
+
+  state.googleTokenClient.requestAccessToken({ prompt: "consent" });
+}
+
+async function saveDirectlyToGoogle() {
+  const contact = readForm();
+  if (!contact.name && !contact.company && !contact.mobile && !contact.email) {
+    setStatus("Google 연락처에 저장할 정보가 없습니다.", 0);
+    return;
+  }
+
+  if (!state.googleAccessToken) {
+    setStatus("먼저 Google 권한 연결을 해 주세요.", 0);
+    return;
+  }
+
+  $("directSaveBtn").disabled = true;
+  setStatus("Google 연락처에 직접 저장하는 중입니다.", 35);
+
+  try {
+    const response = await fetch("https://people.googleapis.com/v1/people:createContact?personFields=names,organizations,phoneNumbers,emailAddresses,addresses,urls,biographies", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${state.googleAccessToken}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(toGooglePerson(contact))
+    });
+
+    const result = await response.json();
+    if (!response.ok) {
+      if (response.status === 401 || response.status === 403) {
+        state.googleAccessToken = "";
+        updateGoogleButtons();
+      }
+      throw new Error(result.error?.message || "Google 연락처 저장에 실패했습니다.");
+    }
+
+    setStatus("Google 연락처에 직접 저장했습니다.", 100);
+  } catch (error) {
+    console.error(error);
+    setStatus(error.message || "Google 연락처 저장에 실패했습니다.", 0);
+  } finally {
+    updateGoogleButtons();
+  }
+}
+
+function toGooglePerson(contact) {
+  const person = {};
+  if (contact.name) {
+    person.names = [{ displayName: contact.name }];
+  }
+  if (contact.company || contact.title) {
+    person.organizations = [{
+      name: contact.company || undefined,
+      title: contact.title || undefined
+    }];
+  }
+  const phoneNumbers = [];
+  if (contact.mobile) phoneNumbers.push({ value: contact.mobile, type: "mobile" });
+  if (contact.phone) phoneNumbers.push({ value: contact.phone, type: "work" });
+  if (phoneNumbers.length) person.phoneNumbers = phoneNumbers;
+  if (contact.email) {
+    person.emailAddresses = [{ value: contact.email, type: "work" }];
+  }
+  if (contact.address) {
+    person.addresses = [{ formattedValue: contact.address, type: "work" }];
+  }
+  if (contact.website) {
+    person.urls = [{ value: contact.website, type: "work" }];
+  }
+  if (contact.notes) {
+    person.biographies = [{ value: contact.notes, contentType: "TEXT_PLAIN" }];
+  }
+  return person;
 }
 
 function renderContacts() {

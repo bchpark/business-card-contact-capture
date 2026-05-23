@@ -488,6 +488,33 @@ input:focus {
   flex-wrap: wrap;
 }
 
+.google-setup {
+  margin: -8px 0 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfcfb;
+  padding: 12px;
+}
+
+.google-setup summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 800;
+}
+
+.google-setup label {
+  margin-top: 12px;
+  display: grid;
+  gap: 7px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.google-setup button {
+  margin-top: 10px;
+}
+
 .saved-header {
   border-top: 1px solid var(--line);
   padding-top: 18px;

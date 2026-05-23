@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script defer src="https://accounts.google.com/gsi/client"></script>
     <script defer src="app.js"></script>
   </head>
   <body>
@@ -143,6 +144,14 @@
         </form>
 
         <div class="export-row">
+          <button id="googleAuthBtn" class="secondary" type="button">
+            <i data-lucide="key-round"></i>
+            Google 권한 연결
+          </button>
+          <button id="directSaveBtn" class="primary" type="button" disabled>
+            <i data-lucide="cloud-check"></i>
+            Google 연락처에 저장
+          </button>
           <button id="csvBtn" class="secondary" type="button">
             <i data-lucide="file-spreadsheet"></i>
             Google CSV
@@ -152,6 +161,18 @@
             vCard
           </button>
         </div>
+
+        <details class="google-setup">
+          <summary>Google 직접 저장 설정</summary>
+          <label>
+            Google OAuth Client ID
+            <input id="googleClientId" placeholder="000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
+          </label>
+          <button id="saveClientIdBtn" class="secondary" type="button">
+            <i data-lucide="save"></i>
+            Client ID 저장
+          </button>
+        </details>
 
         <div class="saved-header">
           <h2>저장된 명함</h2>

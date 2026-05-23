@@ -24,6 +24,17 @@ node server.js
 3. 자동 추출된 이름, 회사, 전화번호, 이메일 등을 확인하고 수정합니다.
 4. `Google CSV`를 내려받아 Google 연락처의 가져오기 메뉴에서 업로드합니다.
 
+## Google 연락처 직접 저장
+
+직접 저장 기능은 Google People API를 사용합니다. GitHub Pages는 정적 호스팅이라 앱 안에 비밀키를 둘 수 없으므로, 브라우저용 OAuth Client ID를 직접 입력해야 합니다.
+
+1. Google Cloud Console에서 People API를 사용 설정합니다.
+2. OAuth 동의 화면을 설정합니다.
+3. OAuth 클라이언트 ID를 `웹 애플리케이션` 유형으로 만듭니다.
+4. 승인된 JavaScript 원본에 `https://bchpark.github.io`를 추가합니다.
+5. 앱의 `Google 직접 저장 설정`에 Client ID를 저장합니다.
+6. `Google 권한 연결`을 누른 뒤 `Google 연락처에 저장`을 누릅니다.
+
 ## 한글 인식 팁
 
 - 기본값인 `한글 강화`는 명함을 3배 확대하고 대비/샤픈 보정을 적용합니다.
