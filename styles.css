@@ -27,6 +27,10 @@ body {
   font-family: "Segoe UI", "Noto Sans KR", system-ui, sans-serif;
 }
 
+body.landscape-workspace {
+  background: #eef3ef;
+}
+
 body.is-adjusting-box {
   overflow: hidden;
 }
@@ -46,12 +50,12 @@ button {
 }
 
 .app-shell {
-  width: min(1240px, calc(100% - 32px));
+  width: min(1480px, calc(100% - 20px));
   margin: 0 auto;
-  padding: 28px 0;
+  padding: 10px 0;
   display: grid;
-  grid-template-columns: minmax(0, 1.04fr) minmax(360px, 0.96fr);
-  gap: 20px;
+  grid-template-columns: minmax(0, 1.45fr) minmax(360px, 0.55fr);
+  gap: 12px;
 }
 
 .capture-panel,
@@ -60,7 +64,7 @@ button {
   border: 1px solid rgba(223, 230, 223, 0.9);
   box-shadow: var(--shadow);
   border-radius: 8px;
-  padding: 24px;
+  padding: 14px;
 }
 
 .brand-row,
@@ -90,8 +94,8 @@ h2 {
 }
 
 h1 {
-  font-size: clamp(2rem, 5vw, 4.8rem);
-  line-height: 0.98;
+  font-size: clamp(1.7rem, 3.4vw, 3.2rem);
+  line-height: 1.02;
   max-width: 10em;
   word-break: keep-all;
 }
@@ -146,20 +150,20 @@ svg {
 }
 
 .scan-surface {
-  margin-top: 24px;
-  min-height: 360px;
+  margin-top: 14px;
+  min-height: 0;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #edf2ee;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 18px;
-  padding: 18px;
+  grid-template-columns: 220px minmax(240px, 1fr);
+  gap: 10px;
+  padding: 10px;
 }
 
 .card-visual {
   position: relative;
-  min-height: 260px;
+  min-height: 180px;
   border-radius: 8px;
   background:
     linear-gradient(140deg, rgba(255, 255, 255, 0.9), rgba(245, 247, 243, 0.78)),
@@ -220,7 +224,7 @@ svg {
 }
 
 .drop-zone {
-  min-height: 260px;
+  min-height: 180px;
   border: 2px dashed #aeb9b0;
   border-radius: 8px;
   background: white;
@@ -274,6 +278,7 @@ svg {
 
 .preview-frame.is-visible {
   display: block;
+  aspect-ratio: 16 / 9;
 }
 
 .preview-stage {
@@ -282,13 +287,13 @@ svg {
 }
 
 .preview-frame.is-wide {
-  max-height: 72vh;
+  max-height: 76vh;
   overflow: auto;
   border: 2px solid var(--accent);
 }
 
 .preview-frame.is-wide .preview-stage {
-  width: max(150vw, 760px);
+  width: max(132vw, 980px);
 }
 
 body.is-editing-photo .app-shell {
@@ -346,7 +351,7 @@ body.is-editing-photo .preview-tools {
   position: fixed;
   left: 0;
   right: 0;
-  bottom: 156px;
+  bottom: clamp(150px, 26vh, 210px);
   z-index: 20;
   padding: 8px;
   background: rgba(245, 247, 243, 0.96);
@@ -372,7 +377,7 @@ body.is-editing-photo .preview-tools {
 .preview-tools {
   grid-column: 1 / -1;
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
 .preview-tools[hidden] {
@@ -521,7 +526,7 @@ select:focus {
 }
 
 .progress-wrap {
-  margin: 16px 0;
+  margin: 10px 0;
 }
 
 .progress-track {
@@ -640,7 +645,7 @@ body.is-editing-photo .edit-only {
 }
 
 .contact-form {
-  margin-top: 20px;
+  margin-top: 14px;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 13px;
@@ -707,7 +712,7 @@ body.is-editing-photo .edit-only {
   margin-top: 12px;
   display: grid;
   gap: 10px;
-  max-height: 380px;
+  max-height: 300px;
   overflow: auto;
   padding-right: 4px;
 }
@@ -744,14 +749,17 @@ body.is-editing-photo .edit-only {
 }
 
 @media (max-width: 940px) {
-  .app-shell,
-  .scan-surface {
+  .app-shell {
     grid-template-columns: 1fr;
   }
 
+  .scan-surface {
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1fr);
+  }
+
   .app-shell {
-    width: min(100% - 20px, 680px);
-    padding: 10px 0;
+    width: min(100% - 10px, 920px);
+    padding: 5px 0 10px;
   }
 
   .brand-row,
@@ -761,7 +769,7 @@ body.is-editing-photo .edit-only {
   }
 
   h1 {
-    font-size: 2.35rem;
+    font-size: 2rem;
     line-height: 1.08;
   }
 
@@ -779,19 +787,65 @@ body.is-editing-photo .edit-only {
   }
 
   .preview-frame.is-wide {
-    min-height: 56vh;
-    max-height: 72vh;
+    min-height: 48vh;
+    max-height: 70vh;
   }
 
   .preview-frame.is-wide .preview-stage {
-    width: max(170vw, 760px);
+    width: max(145vw, 820px);
   }
 }
 
 @media (max-width: 540px) {
   .capture-panel,
   .contact-panel {
-    padding: 16px;
+    padding: 10px;
+  }
+
+  .scan-surface {
+    display: grid;
+    grid-template-columns: 112px minmax(0, 1fr);
+    gap: 8px;
+    padding: 8px;
+  }
+
+  .card-visual,
+  .drop-zone {
+    min-height: 112px;
+  }
+
+  .drop-zone {
+    padding: 8px;
+  }
+
+  .drop-zone strong {
+    font-size: 0.88rem;
+  }
+
+  .drop-zone span:last-child {
+    display: none;
+  }
+
+  .icon-box {
+    width: 42px;
+    height: 42px;
+  }
+
+  .preview-frame.is-visible {
+    aspect-ratio: 16 / 9;
+  }
+
+  .preview-frame.is-wide {
+    min-height: 52vh;
+    max-height: 68vh;
+  }
+
+  .preview-frame.is-wide .preview-stage {
+    width: max(155vw, 760px);
+  }
+
+  .preview-tools {
+    gap: 6px;
   }
 
   .contact-form {

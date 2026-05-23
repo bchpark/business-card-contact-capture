@@ -42,6 +42,8 @@ const fields = ["name", "company", "title", "mobile", "phone", "email", "website
 const $ = (id) => document.getElementById(id);
 
 window.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("landscape-workspace");
+
   if (window.lucide) {
     window.lucide.createIcons();
   }
