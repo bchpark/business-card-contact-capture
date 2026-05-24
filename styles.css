@@ -315,7 +315,6 @@ body.is-editing-photo .card-visual,
 body.is-editing-photo .drop-zone,
 body.is-editing-photo .ocr-options,
 body.is-editing-photo .progress-wrap,
-body.is-editing-photo .raw-text,
 body.is-editing-photo #parseBtn,
 body.is-editing-photo .contact-panel {
   display: none;
@@ -568,13 +567,6 @@ select:focus {
   margin: 8px 0 0;
   color: var(--muted);
   font-size: 0.92rem;
-}
-
-.raw-text {
-  display: grid;
-  gap: 8px;
-  color: var(--muted);
-  font-weight: 700;
 }
 
 textarea,
