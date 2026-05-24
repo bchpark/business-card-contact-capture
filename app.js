@@ -51,8 +51,8 @@ window.addEventListener("DOMContentLoaded", () => {
   $("imageInput").addEventListener("change", handleImage);
   $("fitViewBtn").addEventListener("click", () => setPreviewMode("fit"));
   $("wideViewBtn").addEventListener("click", () => setPreviewMode("wide"));
-  $("editViewBtn").addEventListener("click", () => setEditMode(true));
-  $("closeEditViewBtn").addEventListener("click", () => setEditMode(false));
+  $("editViewBtn").addEventListener("click", () => setPreviewMode("edit"));
+  $("closeEditViewBtn").addEventListener("click", () => setPreviewMode("fit"));
   $("scanBtn").addEventListener("click", handleScanButton);
   $("clearBtn").addEventListener("click", resetCurrent);
   $("rescanBoxesBtn").addEventListener("click", rescanBoxes);
@@ -100,30 +100,29 @@ function setPreviewMode(mode) {
   const frame = $("previewFrame");
   const fitButton = $("fitViewBtn");
   const wideButton = $("wideViewBtn");
+  const editButton = $("editViewBtn");
+  const isEdit = mode === "edit";
   const isWide = mode === "wide";
+  const isExpanded = isWide || isEdit;
 
-  frame.classList.toggle("is-wide", isWide);
-  fitButton.classList.toggle("primary", !isWide);
-  fitButton.classList.toggle("secondary", isWide);
+  document.body.classList.toggle("is-editing-photo", isEdit);
+  frame.classList.toggle("is-wide", isExpanded);
+  fitButton.classList.toggle("primary", mode === "fit");
+  fitButton.classList.toggle("secondary", mode !== "fit");
   wideButton.classList.toggle("primary", isWide);
   wideButton.classList.toggle("secondary", !isWide);
+  editButton.classList.toggle("primary", isEdit);
+  editButton.classList.toggle("secondary", !isEdit);
 
-  if (!isWide) {
+  if (!isExpanded) {
     frame.scrollLeft = 0;
     frame.scrollTop = 0;
   }
-}
 
-function setEditMode(enabled) {
-  if (!$("previewFrame").classList.contains("is-visible")) return;
-
-  document.body.classList.toggle("is-editing-photo", enabled);
-  if (enabled) {
-    setPreviewMode("wide");
+  if (isEdit) {
     setStatus("편집 화면입니다. 박스를 선택하고 아래 버튼으로 조절한 뒤 글자 인식을 눌러 주세요.", 100);
     if (state.selectedBoxType) updateBoxControls();
-  } else {
-    setPreviewMode("fit");
+  } else if (mode === "fit") {
     setStatus("전체 보기로 돌아왔습니다.", 100);
   }
 }
@@ -180,8 +179,8 @@ async function scanImage() {
 }
 
 function handleScanButton() {
-  if (state.selectedBoxType && state.boxes[state.selectedBoxType]) {
-    rescanSingleBox(state.selectedBoxType);
+  if (hasVisibleBoxes()) {
+    rescanBoxes();
     return;
   }
 
@@ -242,6 +241,7 @@ async function preprocessImage(file, options) {
 async function rescanBoxes() {
   if (!state.imageFile || !hasVisibleBoxes() || !window.Tesseract) return;
 
+  $("scanBtn").disabled = true;
   $("rescanBoxesBtn").disabled = true;
   setStatus("모든 영역을 다시 인식하는 중입니다.", 10);
 
@@ -256,6 +256,7 @@ async function rescanBoxes() {
     console.error(error);
     setStatus("영역 재인식에 실패했습니다. 박스를 글자에 조금 더 가깝게 맞춰 다시 시도해 주세요.", 0);
   } finally {
+    $("scanBtn").disabled = false;
     $("rescanBoxesBtn").disabled = !hasVisibleBoxes();
   }
 }
