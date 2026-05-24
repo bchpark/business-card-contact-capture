@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>명함 연락처 변환기</title>
-    <link rel="stylesheet" href="styles.css?v=scan-one-button">
+    <link rel="stylesheet" href="styles.css?v=remove-reparse-button">
     <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script defer src="https://accounts.google.com/gsi/client"></script>
-    <script defer src="app.js?v=scan-one-button"></script>
+    <script defer src="app.js?v=remove-reparse-button"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -123,12 +123,8 @@
 
         <label class="raw-text">
           <span>인식된 글자</span>
-          <textarea id="rawText" rows="9" placeholder="OCR 결과가 여기에 표시됩니다. 필요한 경우 직접 수정한 뒤 다시 추출하세요."></textarea>
+          <textarea id="rawText" rows="9" placeholder="OCR 결과가 여기에 표시됩니다. 필요한 경우 직접 수정할 수 있습니다."></textarea>
         </label>
-        <button id="parseBtn" class="secondary wide-button" type="button">
-          <i data-lucide="wand-sparkles"></i>
-          수정한 글자로 다시 추출
-        </button>
         <button id="rescanBoxesBtn" class="secondary wide-button" type="button" disabled>
           <i data-lucide="scan-line"></i>
           수동으로 전체 다시 인식

@@ -54,7 +54,6 @@ window.addEventListener("DOMContentLoaded", () => {
   $("editViewBtn").addEventListener("click", () => setEditMode(true));
   $("closeEditViewBtn").addEventListener("click", () => setEditMode(false));
   $("scanBtn").addEventListener("click", handleScanButton);
-  $("parseBtn").addEventListener("click", () => fillForm(parseContact($("rawText").value)));
   $("clearBtn").addEventListener("click", resetCurrent);
   $("rescanBoxesBtn").addEventListener("click", rescanBoxes);
   $("saveBtn").addEventListener("click", saveContact);
