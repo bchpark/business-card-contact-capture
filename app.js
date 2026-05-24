@@ -1217,7 +1217,7 @@ function exportGoogleCsv() {
   download(`google-contacts-${dateStamp()}.csv`, toCsv([headers, ...rows]), "text/csv;charset=utf-8");
 }
 
-function exportVCard() {
+async function exportVCard() {
   const cards = exportableContacts().map((contact) => [
     "BEGIN:VCARD",
     "VERSION:3.0",
@@ -1233,7 +1233,7 @@ function exportVCard() {
     "END:VCARD"
   ].filter(Boolean).join("\n")).join("\n");
 
-  download(`business-cards-${dateStamp()}.vcf`, cards, "text/vcard;charset=utf-8");
+  await saveVCard(`business-cards-${dateStamp()}.vcf`, cards);
 }
 
 function exportableContacts() {
@@ -1252,6 +1252,39 @@ function escapeVcf(value) {
     .replace(/\n/g, "\\n")
     .replace(/,/g, "\\,")
     .replace(/;/g, "\\;");
+}
+
+async function saveVCard(filename, content) {
+  if (!content) {
+    setStatus("내보낼 연락처가 없습니다.", 0);
+    return;
+  }
+
+  const type = "text/vcard;charset=utf-8";
+  if (window.showSaveFilePicker) {
+    try {
+      const handle = await window.showSaveFilePicker({
+        suggestedName: filename,
+        types: [{
+          description: "vCard 연락처 파일",
+          accept: { "text/vcard": [".vcf"] }
+        }]
+      });
+      const writable = await handle.createWritable();
+      await writable.write(new Blob(["\ufeff", content], { type }));
+      await writable.close();
+      setStatus("vCard 파일을 선택한 위치에 저장했습니다.", 100);
+      return;
+    } catch (error) {
+      if (error?.name === "AbortError") {
+        setStatus("vCard 저장을 취소했습니다.", 0);
+        return;
+      }
+      console.warn("Save file picker failed; falling back to download.", error);
+    }
+  }
+
+  download(filename, content, type);
 }
 
 function download(filename, content, type) {
