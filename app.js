@@ -59,6 +59,7 @@ window.addEventListener("DOMContentLoaded", () => {
   $("googleAuthBtn").addEventListener("click", connectGoogle);
   $("directSaveBtn").addEventListener("click", saveDirectlyToGoogle);
   $("saveClientIdBtn").addEventListener("click", saveGoogleClientId);
+  $("googleClientId").addEventListener("input", updateGoogleButtons);
   $("csvBtn").addEventListener("click", exportGoogleCsv);
   $("vcfBtn").addEventListener("click", exportVCard);
   $("deleteAllBtn").addEventListener("click", deleteAllContacts);
@@ -822,6 +823,18 @@ function saveContact() {
 }
 
 function saveGoogleClientId() {
+  const clientId = syncGoogleClientIdFromInput();
+
+  if (clientId) {
+    setStatus("Google Client ID를 저장했습니다. 이제 구글 연락처에 저장할 수 있습니다.", 100);
+  } else {
+    setStatus("Google Client ID를 비웠습니다.", 0);
+  }
+
+  updateGoogleButtons();
+}
+
+function syncGoogleClientIdFromInput() {
   const clientId = $("googleClientId").value.trim();
   state.googleClientId = clientId;
   state.googleAccessToken = "";
@@ -829,50 +842,58 @@ function saveGoogleClientId() {
 
   if (clientId) {
     localStorage.setItem("google-oauth-client-id", clientId);
-    setStatus("Google Client ID를 저장했습니다. 이제 Google 권한 연결을 눌러 주세요.", 100);
   } else {
     localStorage.removeItem("google-oauth-client-id");
-    setStatus("Google Client ID를 비웠습니다.", 0);
   }
 
-  updateGoogleButtons();
+  return clientId;
 }
 
 function updateGoogleButtons() {
-  $("googleAuthBtn").disabled = !state.googleClientId;
-  $("directSaveBtn").disabled = !state.googleAccessToken;
+  $("googleAuthBtn").disabled = !state.googleClientId && !$("googleClientId").value.trim();
+  $("directSaveBtn").disabled = false;
 }
 
 async function connectGoogle() {
+  if (!state.googleClientId && $("googleClientId").value.trim()) {
+    syncGoogleClientIdFromInput();
+  }
+
   if (!state.googleClientId) {
-    setStatus("먼저 Google OAuth Client ID를 입력하고 저장해 주세요.", 0);
-    return;
+    $("googleSetup").open = true;
+    $("googleClientId").focus();
+    setStatus("구글 연락처 저장을 위해 Google OAuth Client ID를 입력해 주세요.", 0);
+    return false;
   }
 
   await loadGoogleIdentityScript();
 
   if (!window.google?.accounts?.oauth2) {
     setStatus("Google 로그인 라이브러리를 불러오지 못했습니다. 페이지를 새로고침해 주세요.", 0);
-    return;
+    return false;
   }
 
-  state.googleTokenClient = window.google.accounts.oauth2.initTokenClient({
-    client_id: state.googleClientId,
-    scope: "https://www.googleapis.com/auth/contacts",
-    callback: (response) => {
-      if (response.error) {
-        console.error(response);
-        setStatus(`Google 권한 연결 실패: ${response.error}`, 0);
-        return;
+  return new Promise((resolve) => {
+    state.googleTokenClient = window.google.accounts.oauth2.initTokenClient({
+      client_id: state.googleClientId,
+      scope: "https://www.googleapis.com/auth/contacts",
+      callback: (response) => {
+        if (response.error) {
+          console.error(response);
+          setStatus(`Google 권한 연결 실패: ${response.error}`, 0);
+          resolve(false);
+          return;
+        }
+
+        state.googleAccessToken = response.access_token;
+        updateGoogleButtons();
+        setStatus("Google 연락처 저장 권한이 연결되었습니다.", 100);
+        resolve(true);
       }
+    });
 
-      state.googleAccessToken = response.access_token;
-      updateGoogleButtons();
-      setStatus("Google 연락처 저장 권한이 연결되었습니다.", 100);
-    }
+    state.googleTokenClient.requestAccessToken({ prompt: "consent" });
   });
-
-  state.googleTokenClient.requestAccessToken({ prompt: "consent" });
 }
 
 function loadGoogleIdentityScript() {
@@ -905,8 +926,8 @@ async function saveDirectlyToGoogle() {
   }
 
   if (!state.googleAccessToken) {
-    setStatus("먼저 Google 권한 연결을 해 주세요.", 0);
-    return;
+    const connected = await connectGoogle();
+    if (!connected) return;
   }
 
   $("directSaveBtn").disabled = true;
