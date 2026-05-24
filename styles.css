@@ -384,6 +384,7 @@ body.is-editing-photo #clearBtn {
   object-fit: contain;
   border-radius: 8px;
   background: transparent;
+  image-orientation: from-image;
   user-select: none;
   -webkit-user-drag: none;
   touch-action: none;

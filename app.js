@@ -1,6 +1,7 @@
 const state = {
   imageFile: null,
   imageUrl: "",
+  imageLoadId: 0,
   googleAccessToken: "",
   googleTokenClient: null,
   googleClientId: localStorage.getItem("google-oauth-client-id") || "",
@@ -70,16 +71,30 @@ window.addEventListener("DOMContentLoaded", () => {
   renderContacts();
 });
 
-function handleImage(event) {
+async function handleImage(event) {
   const [file] = event.target.files || [];
   if (!file) return;
 
-  state.imageFile = file;
+  const loadId = state.imageLoadId + 1;
+  state.imageLoadId = loadId;
+  setStatus("사진 방향을 확인하는 중입니다.", 20);
+
+  let preparedFile;
+  try {
+    preparedFile = await normalizeImageOrientation(file);
+  } catch (error) {
+    console.warn("Image orientation normalization failed.", error);
+    preparedFile = file;
+  }
+
+  if (loadId !== state.imageLoadId) return;
+
+  state.imageFile = preparedFile;
   if (state.imageUrl) URL.revokeObjectURL(state.imageUrl);
-  const url = URL.createObjectURL(file);
+  const url = URL.createObjectURL(preparedFile);
   state.imageUrl = url;
   const preview = $("preview");
-  preview.src = url;
+  preview.onload = null;
   preview.onload = () => {
     const isLandscape = preview.naturalWidth > preview.naturalHeight * 1.08;
     if (isLandscape) {
@@ -87,6 +102,7 @@ function handleImage(event) {
       setStatus("가로 사진을 전체 보기로 표시했습니다. 정밀 조정이 필요하면 편집 화면을 눌러 주세요.", 100);
     }
   };
+  preview.src = url;
   $("previewFrame").classList.add("is-visible");
   preview.classList.add("is-visible");
   $("previewTools").hidden = false;
@@ -94,6 +110,117 @@ function handleImage(event) {
   hideOcrBoxes();
   $("scanBtn").disabled = false;
   setStatus("사진이 준비되었습니다. 한글 강화 전처리 후 인식할 수 있습니다.", 0);
+}
+
+async function normalizeImageOrientation(file) {
+  const orientation = await readExifOrientation(file);
+  if (orientation <= 1) return file;
+
+  const bitmap = await createBitmapWithOrientation(file, "none");
+  const swapSize = orientation >= 5 && orientation <= 8;
+  const width = bitmap.width;
+  const height = bitmap.height;
+  const canvas = document.createElement("canvas");
+  canvas.width = swapSize ? height : width;
+  canvas.height = swapSize ? width : height;
+  const ctx = canvas.getContext("2d");
+
+  applyExifTransform(ctx, orientation, width, height);
+  ctx.drawImage(bitmap, 0, 0);
+  bitmap.close();
+
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+  if (!blob) return file;
+
+  return new File([blob], file.name.replace(/\.[^.]+$/, "") + ".png", {
+    type: "image/png",
+    lastModified: file.lastModified
+  });
+}
+
+async function createBitmapWithOrientation(file, imageOrientation = "from-image") {
+  try {
+    return await createImageBitmap(file, { imageOrientation });
+  } catch {
+    return createImageBitmap(file);
+  }
+}
+
+async function readExifOrientation(file) {
+  if (!/^image\/jpe?g$/i.test(file.type)) return 1;
+
+  const buffer = await file.slice(0, 65536).arrayBuffer();
+  const view = new DataView(buffer);
+  if (view.getUint16(0, false) !== 0xffd8) return 1;
+
+  let offset = 2;
+  while (offset + 4 < view.byteLength) {
+    const marker = view.getUint16(offset, false);
+    offset += 2;
+    if (marker === 0xffda || marker === 0xffd9) break;
+
+    const size = view.getUint16(offset, false);
+    if (size < 2 || offset + size > view.byteLength) break;
+
+    if (marker === 0xffe1 && view.getUint32(offset + 2, false) === 0x45786966) {
+      return parseTiffOrientation(view, offset + 8);
+    }
+
+    offset += size;
+  }
+
+  return 1;
+}
+
+function parseTiffOrientation(view, tiffOffset) {
+  if (tiffOffset + 8 > view.byteLength) return 1;
+
+  const byteOrder = view.getUint16(tiffOffset, false);
+  const littleEndian = byteOrder === 0x4949;
+  if (!littleEndian && byteOrder !== 0x4d4d) return 1;
+
+  const firstIfdOffset = view.getUint32(tiffOffset + 4, littleEndian);
+  const ifdOffset = tiffOffset + firstIfdOffset;
+  if (ifdOffset + 2 > view.byteLength) return 1;
+
+  const entryCount = view.getUint16(ifdOffset, littleEndian);
+  for (let i = 0; i < entryCount; i += 1) {
+    const entryOffset = ifdOffset + 2 + i * 12;
+    if (entryOffset + 12 > view.byteLength) break;
+    if (view.getUint16(entryOffset, littleEndian) === 0x0112) {
+      return view.getUint16(entryOffset + 8, littleEndian) || 1;
+    }
+  }
+
+  return 1;
+}
+
+function applyExifTransform(ctx, orientation, width, height) {
+  switch (orientation) {
+    case 2:
+      ctx.transform(-1, 0, 0, 1, width, 0);
+      break;
+    case 3:
+      ctx.transform(-1, 0, 0, -1, width, height);
+      break;
+    case 4:
+      ctx.transform(1, 0, 0, -1, 0, height);
+      break;
+    case 5:
+      ctx.transform(0, 1, 1, 0, 0, 0);
+      break;
+    case 6:
+      ctx.transform(0, 1, -1, 0, height, 0);
+      break;
+    case 7:
+      ctx.transform(0, -1, -1, 0, height, width);
+      break;
+    case 8:
+      ctx.transform(0, -1, 1, 0, 0, width);
+      break;
+    default:
+      break;
+  }
 }
 
 function setPreviewMode(mode) {
