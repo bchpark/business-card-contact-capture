@@ -466,35 +466,35 @@ body.is-editing-photo #clearBtn {
 
 .resize-handle {
   position: absolute;
-  width: 28px;
-  height: 28px;
-  border: 2px solid white;
-  border-radius: 8px;
+  width: 14px;
+  height: 14px;
+  border: 1px solid white;
+  border-radius: 4px;
   background: var(--box-color);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 
 .resize-handle.nw {
-  left: -16px;
-  top: -16px;
+  left: -8px;
+  top: -8px;
   cursor: nwse-resize;
 }
 
 .resize-handle.ne {
-  right: -16px;
-  top: -16px;
+  right: -8px;
+  top: -8px;
   cursor: nesw-resize;
 }
 
 .resize-handle.sw {
-  left: -16px;
-  bottom: -16px;
+  left: -8px;
+  bottom: -8px;
   cursor: nesw-resize;
 }
 
 .resize-handle.se {
-  right: -16px;
-  bottom: -16px;
+  right: -8px;
+  bottom: -8px;
   cursor: nwse-resize;
 }
 
@@ -890,28 +890,28 @@ body.is-editing-photo .edit-only {
   }
 
   .resize-handle {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
   }
 
   .resize-handle.nw {
-    left: -20px;
-    top: -20px;
+    left: -10px;
+    top: -10px;
   }
 
   .resize-handle.ne {
-    right: -20px;
-    top: -20px;
+    right: -10px;
+    top: -10px;
   }
 
   .resize-handle.sw {
-    left: -20px;
-    bottom: -20px;
+    left: -10px;
+    bottom: -10px;
   }
 
   .resize-handle.se {
-    right: -20px;
-    bottom: -20px;
+    right: -10px;
+    bottom: -10px;
   }
 }
