@@ -1218,22 +1218,28 @@ function exportGoogleCsv() {
 }
 
 async function exportVCard() {
-  const cards = exportableContacts().map((contact) => [
+  const cards = exportableContacts().map((contact) => {
+    const displayName = contact.name || contact.company || "Business Card";
+    return [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    `FN:${escapeVcf(contact.name || contact.company)}`,
+    "PRODID:-//Business Card Contact Capture//KO",
+    `FN:${escapeVcf(displayName)}`,
+    `N:${toVCardName(contact.name || displayName)}`,
     contact.company ? `ORG:${escapeVcf(contact.company)}` : "",
     contact.title ? `TITLE:${escapeVcf(contact.title)}` : "",
-    contact.mobile ? `TEL;TYPE=CELL:${escapeVcf(contact.mobile)}` : "",
-    contact.phone ? `TEL;TYPE=WORK:${escapeVcf(contact.phone)}` : "",
+    contact.mobile ? `TEL;TYPE=CELL,VOICE:${escapeVcf(contact.mobile)}` : "",
+    contact.phone ? `TEL;TYPE=WORK,VOICE:${escapeVcf(contact.phone)}` : "",
     contact.email ? `EMAIL;TYPE=WORK:${escapeVcf(contact.email)}` : "",
     contact.website ? `URL:${escapeVcf(contact.website)}` : "",
     contact.address ? `ADR;TYPE=WORK:;;${escapeVcf(contact.address)};;;;` : "",
     contact.notes ? `NOTE:${escapeVcf(contact.notes)}` : "",
+    `REV:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`,
     "END:VCARD"
-  ].filter(Boolean).join("\n")).join("\n");
+    ].filter(Boolean).join("\r\n");
+  }).join("\r\n");
 
-  await saveVCard(`business-cards-${dateStamp()}.vcf`, cards);
+  await saveVCard(`business-cards-${dateStamp()}.vcf`, `${cards}\r\n`);
 }
 
 function exportableContacts() {
@@ -1248,10 +1254,22 @@ function toCsv(rows) {
 
 function escapeVcf(value) {
   return String(value || "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
     .replace(/\\/g, "\\\\")
     .replace(/\n/g, "\\n")
     .replace(/,/g, "\\,")
     .replace(/;/g, "\\;");
+}
+
+function toVCardName(name) {
+  const parts = String(name || "").trim().split(/\s+/).filter(Boolean);
+  if (parts.length > 1 && /^[A-Za-z\s.'-]+$/.test(name)) {
+    const familyName = parts.pop();
+    return `${escapeVcf(familyName)};${escapeVcf(parts.join(" "))};;;`;
+  }
+
+  return `;${escapeVcf(name)};;;`;
 }
 
 async function saveVCard(filename, content) {
@@ -1260,18 +1278,18 @@ async function saveVCard(filename, content) {
     return;
   }
 
-  const type = "text/vcard;charset=utf-8";
+  const type = "text/x-vcard;charset=utf-8";
   if (window.showSaveFilePicker) {
     try {
       const handle = await window.showSaveFilePicker({
         suggestedName: filename,
         types: [{
           description: "vCard 연락처 파일",
-          accept: { "text/vcard": [".vcf"] }
+          accept: { "text/x-vcard": [".vcf"] }
         }]
       });
       const writable = await handle.createWritable();
-      await writable.write(new Blob(["\ufeff", content], { type }));
+      await writable.write(new Blob([content], { type }));
       await writable.close();
       setStatus("vCard 파일을 선택한 위치에 저장했습니다.", 100);
       return;
@@ -1284,16 +1302,17 @@ async function saveVCard(filename, content) {
     }
   }
 
-  download(filename, content, type);
+  download(filename, content, type, { bom: false });
 }
 
-function download(filename, content, type) {
+function download(filename, content, type, options = {}) {
   if (!content) {
     setStatus("내보낼 연락처가 없습니다.", 0);
     return;
   }
 
-  const blob = new Blob(["\ufeff", content], { type });
+  const blobParts = options.bom === false ? [content] : ["\ufeff", content];
+  const blob = new Blob(blobParts, { type });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
