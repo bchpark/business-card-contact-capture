@@ -678,16 +678,27 @@ body.is-editing-photo .edit-only {
 
 .export-row {
   justify-content: flex-start;
-  margin: 18px 0 24px;
+  margin: 18px 0 12px;
   flex-wrap: wrap;
 }
 
-.google-setup {
-  margin: -8px 0 24px;
+.advanced-save-panel {
+  margin: 0 0 24px;
   border: 1px solid var(--line);
   border-radius: 8px;
   background: #fbfcfb;
   padding: 12px;
+}
+
+.advanced-save-panel[hidden] {
+  display: none;
+}
+
+.advanced-save-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
 }
 
 .google-setup summary {
@@ -868,6 +879,7 @@ body.is-editing-photo .edit-only {
   .ghost-link,
   .action-row button,
   .export-row button,
+  .advanced-save-actions button,
   .preview-tools button,
   #saveBtn,
   .box-controls-head button {

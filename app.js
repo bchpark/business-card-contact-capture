@@ -57,6 +57,7 @@ window.addEventListener("DOMContentLoaded", () => {
   $("scanBtn").addEventListener("click", handleScanButton);
   $("clearBtn").addEventListener("click", resetCurrent);
   $("saveBtn").addEventListener("click", saveContact);
+  $("advancedToggleBtn").addEventListener("click", toggleAdvancedSave);
   $("googleAuthBtn").addEventListener("click", connectGoogle);
   $("directSaveBtn").addEventListener("click", saveDirectlyToGoogle);
   $("saveClientIdBtn").addEventListener("click", saveGoogleClientId);
@@ -949,6 +950,14 @@ function saveContact() {
   setStatus("연락처 목록에 추가했습니다.", 100);
 }
 
+function toggleAdvancedSave() {
+  const panel = $("advancedSavePanel");
+  const button = $("advancedToggleBtn");
+  const willOpen = panel.hidden;
+  panel.hidden = !willOpen;
+  button.setAttribute("aria-expanded", String(willOpen));
+}
+
 function saveGoogleClientId() {
   const clientId = syncGoogleClientIdFromInput();
 
@@ -987,6 +996,8 @@ async function connectGoogle() {
   }
 
   if (!state.googleClientId) {
+    $("advancedSavePanel").hidden = false;
+    $("advancedToggleBtn").setAttribute("aria-expanded", "true");
     $("googleSetup").open = true;
     $("googleClientId").focus();
     setStatus("구글 연락처 저장을 위해 Google OAuth Client ID를 입력해 주세요.", 0);

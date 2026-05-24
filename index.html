@@ -4,11 +4,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>명함 연락처 변환기</title>
-    <link rel="stylesheet" href="styles.css?v=normalize-photo-orientation">
+    <link rel="stylesheet" href="styles.css?v=advanced-google-save">
     <script defer src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script defer src="https://accounts.google.com/gsi/client"></script>
-    <script defer src="app.js?v=normalize-photo-orientation"></script>
+    <script defer src="app.js?v=advanced-google-save"></script>
   </head>
   <body>
     <main class="app-shell">
@@ -170,14 +170,6 @@
         </form>
 
         <div class="export-row">
-          <button id="googleAuthBtn" class="secondary" type="button">
-            <i data-lucide="key-round"></i>
-            구글 권한 연결
-          </button>
-          <button id="directSaveBtn" class="primary" type="button">
-            <i data-lucide="cloud-check"></i>
-            구글 연락처에 저장
-          </button>
           <button id="csvBtn" class="secondary" type="button">
             <i data-lucide="file-spreadsheet"></i>
             Google CSV
@@ -186,10 +178,25 @@
             <i data-lucide="contact"></i>
             vCard
           </button>
+          <button id="advancedToggleBtn" class="secondary" type="button" aria-expanded="false" aria-controls="advancedSavePanel">
+            <i data-lucide="settings-2"></i>
+            Advanced
+          </button>
         </div>
 
-        <details id="googleSetup" class="google-setup">
-          <summary>구글 연락처 저장</summary>
+        <div id="advancedSavePanel" class="advanced-save-panel" hidden>
+          <div class="advanced-save-actions">
+            <button id="googleAuthBtn" class="secondary" type="button">
+              <i data-lucide="key-round"></i>
+              구글 권한 연결
+            </button>
+            <button id="directSaveBtn" class="primary" type="button">
+              <i data-lucide="cloud-check"></i>
+              구글 연락처에 저장
+            </button>
+          </div>
+          <details id="googleSetup" class="google-setup">
+            <summary>구글 연락처 저장</summary>
           <label>
             Google OAuth Client ID
             <input id="googleClientId" placeholder="000000000000-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx.apps.googleusercontent.com" autocomplete="off">
@@ -198,7 +205,8 @@
             <i data-lucide="save"></i>
             Client ID 저장
           </button>
-        </details>
+          </details>
+        </div>
 
         <div class="saved-header">
           <h2>저장된 명함</h2>
