@@ -55,7 +55,6 @@ window.addEventListener("DOMContentLoaded", () => {
   $("closeEditViewBtn").addEventListener("click", () => setPreviewMode("fit"));
   $("scanBtn").addEventListener("click", handleScanButton);
   $("clearBtn").addEventListener("click", resetCurrent);
-  $("rescanBoxesBtn").addEventListener("click", rescanBoxes);
   $("saveBtn").addEventListener("click", saveContact);
   $("googleAuthBtn").addEventListener("click", connectGoogle);
   $("directSaveBtn").addEventListener("click", saveDirectlyToGoogle);
@@ -242,7 +241,6 @@ async function rescanBoxes() {
   if (!state.imageFile || !hasVisibleBoxes() || !window.Tesseract) return;
 
   $("scanBtn").disabled = true;
-  $("rescanBoxesBtn").disabled = true;
   setStatus("모든 영역을 다시 인식하는 중입니다.", 10);
 
   try {
@@ -257,7 +255,6 @@ async function rescanBoxes() {
     setStatus("영역 재인식에 실패했습니다. 박스를 글자에 조금 더 가깝게 맞춰 다시 시도해 주세요.", 0);
   } finally {
     $("scanBtn").disabled = false;
-    $("rescanBoxesBtn").disabled = !hasVisibleBoxes();
   }
 }
 
@@ -267,9 +264,6 @@ async function rescanSingleBox(type, options = {}) {
 
   const config = boxConfig[type];
   const boxElement = $(config.elementId);
-  if (options.updateButton !== false) {
-    $("rescanBoxesBtn").disabled = true;
-  }
   boxElement.classList.add("is-scanning");
   setStatus(`${config.label} 박스 안의 글자만 다시 인식하는 중입니다.`, 15);
 
@@ -308,9 +302,6 @@ async function rescanSingleBox(type, options = {}) {
       await worker.terminate();
     }
     boxElement.classList.remove("is-scanning");
-    if (options.updateButton !== false) {
-      $("rescanBoxesBtn").disabled = !hasVisibleBoxes();
-    }
   }
 }
 
@@ -448,7 +439,6 @@ function isPersonNameText(value) {
 function setOcrBox(type, box) {
   state.boxes[type] = normalizeBox(box);
   renderOcrBox(type);
-  $("rescanBoxesBtn").disabled = false;
   if (!state.selectedBoxType) selectOcrBox(type);
   updateScanButtonLabel();
 }
@@ -461,7 +451,6 @@ function hideOcrBoxes() {
   });
   state.selectedBoxType = null;
   updateBoxControls();
-  $("rescanBoxesBtn").disabled = true;
   updateScanButtonLabel();
 }
 

@@ -317,7 +317,6 @@ body.is-editing-photo .ocr-options,
 body.is-editing-photo .progress-wrap,
 body.is-editing-photo .raw-text,
 body.is-editing-photo #parseBtn,
-body.is-editing-photo #rescanBoxesBtn,
 body.is-editing-photo .contact-panel {
   display: none;
 }
