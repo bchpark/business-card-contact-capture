@@ -850,7 +850,7 @@ function syncGoogleClientIdFromInput() {
 }
 
 function updateGoogleButtons() {
-  $("googleAuthBtn").disabled = !state.googleClientId && !$("googleClientId").value.trim();
+  $("googleAuthBtn").disabled = false;
   $("directSaveBtn").disabled = false;
 }
 
