@@ -53,13 +53,10 @@ window.addEventListener("DOMContentLoaded", () => {
   $("wideViewBtn").addEventListener("click", () => setPreviewMode("wide"));
   $("editViewBtn").addEventListener("click", () => setEditMode(true));
   $("closeEditViewBtn").addEventListener("click", () => setEditMode(false));
-  $("scanBtn").addEventListener("click", scanImage);
+  $("scanBtn").addEventListener("click", handleScanButton);
   $("parseBtn").addEventListener("click", () => fillForm(parseContact($("rawText").value)));
   $("clearBtn").addEventListener("click", resetCurrent);
   $("rescanBoxesBtn").addEventListener("click", rescanBoxes);
-  $("rescanSelectedBoxBtn").addEventListener("click", () => {
-    if (state.selectedBoxType) rescanSingleBox(state.selectedBoxType);
-  });
   $("saveBtn").addEventListener("click", saveContact);
   $("googleAuthBtn").addEventListener("click", connectGoogle);
   $("directSaveBtn").addEventListener("click", saveDirectlyToGoogle);
@@ -124,7 +121,7 @@ function setEditMode(enabled) {
   document.body.classList.toggle("is-editing-photo", enabled);
   if (enabled) {
     setPreviewMode("wide");
-    setStatus("편집 화면입니다. 박스를 선택하고 아래 버튼으로 조절한 뒤 선택 영역 인식을 눌러 주세요.", 100);
+    setStatus("편집 화면입니다. 박스를 선택하고 아래 버튼으로 조절한 뒤 글자 인식을 눌러 주세요.", 100);
     if (state.selectedBoxType) updateBoxControls();
   } else {
     setPreviewMode("fit");
@@ -181,6 +178,15 @@ async function scanImage() {
     }
     $("scanBtn").disabled = false;
   }
+}
+
+function handleScanButton() {
+  if (state.selectedBoxType && state.boxes[state.selectedBoxType]) {
+    rescanSingleBox(state.selectedBoxType);
+    return;
+  }
+
+  scanImage();
 }
 
 async function preprocessImage(file, options) {
@@ -444,6 +450,7 @@ function setOcrBox(type, box) {
   renderOcrBox(type);
   $("rescanBoxesBtn").disabled = false;
   if (!state.selectedBoxType) selectOcrBox(type);
+  updateScanButtonLabel();
 }
 
 function hideOcrBoxes() {
@@ -455,6 +462,7 @@ function hideOcrBoxes() {
   state.selectedBoxType = null;
   updateBoxControls();
   $("rescanBoxesBtn").disabled = true;
+  updateScanButtonLabel();
 }
 
 function hasVisibleBoxes() {
@@ -522,6 +530,7 @@ function selectOcrBox(type) {
   state.selectedBoxType = type;
   Object.keys(boxConfig).forEach(renderOcrBox);
   updateBoxControls();
+  updateScanButtonLabel();
 }
 
 function updateBoxControls() {
@@ -533,6 +542,12 @@ function updateBoxControls() {
 
   panel.hidden = false;
   $("selectedBoxLabel").textContent = `${boxConfig[state.selectedBoxType].label} 영역 조절`;
+}
+
+function updateScanButtonLabel() {
+  const button = $("scanBtn");
+  if (!button) return;
+  button.lastChild.textContent = " 글자 인식";
 }
 
 function adjustSelectedBox(action) {
@@ -566,7 +581,7 @@ function adjustSelectedBox(action) {
 
   state.boxes[type] = normalizeBox(current);
   renderOcrBox(type);
-  setStatus(`${boxConfig[type].label} 영역을 조절했습니다. 인식하려면 선택 영역 인식을 눌러 주세요.`, 100);
+  setStatus(`${boxConfig[type].label} 영역을 조절했습니다. 인식하려면 글자 인식을 눌러 주세요.`, 100);
 }
 
 function updateDraggedBox(event) {
@@ -608,7 +623,7 @@ function endBoxDrag() {
   state.boxDrag = null;
   document.body.classList.remove("is-adjusting-box");
   if (drag?.moved) {
-    setStatus(`${boxConfig[drag.type].label} 영역을 조절했습니다. 인식하려면 선택 영역 인식을 눌러 주세요.`, 100);
+    setStatus(`${boxConfig[drag.type].label} 영역을 조절했습니다. 인식하려면 글자 인식을 눌러 주세요.`, 100);
   }
 }
 
